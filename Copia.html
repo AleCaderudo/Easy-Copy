@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copia Fácil</title>
+    <style>
+        .tabela-geral {
+            text-align: center;
+        }
+        .lang {
+        margin-top: 30px;
+        margin-left: 26%;
+        }
+        .campo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        .campo-container input {
+            text-align: center;
+            padding: 5px;
+        }
+        .campo-numero {
+            width: 30px; text-align: center;
+        }
+        .campo-container button {
+            padding: 5px 10px;
+        }
+        .aviso {
+            color: red;
+        }
+        .rodape_link {
+            margin-top: 20px;
+            text-decoration: none;
+            font-size: 18px;
+      }
+    </style>
+</head>
+<body>
+
+<div class="tabela-geral">
+
+    <div class="tabela-geral">
+        <select id="languageSelect" class="lang" onchange="changeLanguage()">
+            <option value="">Language / Idioma</option>
+            <option value="pt">Português</option>
+            <option value="en">English</option>
+        </select>
+
+   <h1 id="title">Copia Fácil</h1> <!-- Adicionado o ID "title" -->
+
+   <p class="aviso" id="respo">&emsp;</p>
+
+   <label for="numCampos" id="labelNumCampos">Escolha a quantidade de campos: </label>
+   <input class="campo-numero" type="number" id="numCampos" min="1" value="1">
+
+   <button id="updateBtn" onclick="atualizarCampos()" title="Clique aqui para atualizar a quantidade de campos e os valores das tabelas">Atualizar Campos</button><br><br>
+
+   <div id="camposContainer"></div><br><br>
+
+   <button id="clearBtn" onclick="localStorage.clear();" title="Clique aqui para limpar todos os campos e tabelas">Zerar Campos</button><br><br>
+   <p><a class="rodape_link" href="http://mhps.com.br"  target="_blank" id="denv" title="Acessar site MHPS">Desenvolvido por MHPS</a></p>
+
+</div>
+
+<script>
+    const camposContainer = document.getElementById('camposContainer');
+    const numCamposInput = document.getElementById('numCampos');
+    const respo = document.getElementById('respo');
+    const languageSelect = document.getElementById('languageSelect');
+
+    function criarCampo(id, refValue = '', valorValue = '') {
+        const campoDiv = document.createElement('div');
+        campoDiv.classList.add('campo-container');
+        campoDiv.id = `campo${id}`;
+
+        campoDiv.innerHTML = `
+            <label for="ref${id}" class="refLabel">Ref:</label>
+            <input type="text" id="ref${id}" placeholder="Ref" value="${refValue}" size="10">
+            
+            <label for="valor${id}" class="valueLabel">Valor:</label>
+            <input type="text" id="valor${id}" placeholder="Valor" value="${valorValue}" size="40">
+            
+            <button onclick="copiarValor(${id})" class="copyBtn" title="Clique aqui para copiar o valor de ${valorValue}">Copiar Valor</button>
+        `;
+
+        camposContainer.appendChild(campoDiv);
+    }
+
+    function atualizarCampos() {
+        const numCampos = parseInt(numCamposInput.value);
+        const camposAtuais = document.querySelectorAll('.campo-container');
+        const totalCamposAtuais = camposAtuais.length;
+
+        for (let i = 1; i <= totalCamposAtuais; i++) {
+            const ref = document.getElementById(`ref${i}`).value;
+            const valor = document.getElementById(`valor${i}`).value;
+            localStorage.setItem(`campo${i}`, JSON.stringify({ ref, valor }));
+        }
+
+        if (numCampos > totalCamposAtuais) {
+            for (let i = totalCamposAtuais + 1; i <= numCampos; i++) {
+                const dadosSalvos = JSON.parse(localStorage.getItem(`campo${i}`)) || { ref: '', valor: '' };
+                criarCampo(i, dadosSalvos.ref, dadosSalvos.valor);
+            }
+        } else if (numCampos < totalCamposAtuais) {
+            for (let i = totalCamposAtuais; i > numCampos; i--) {
+                document.getElementById(`campo${i}`).remove();
+                localStorage.removeItem(`campo${i}`);
+            }
+        }
+
+        localStorage.setItem('numCampos', numCampos);
+        respo.innerHTML = 'Campos atualizados e dados salvos com sucesso!';
+    }
+
+    function copiarValor(id) {
+        const valor = document.getElementById(`valor${id}`).value;
+        const ref = document.getElementById(`ref${id}`).value;
+
+        if (!valor) {
+            respo.innerHTML = 'O campo de valor está vazio!';
+            return;
+        }
+
+        navigator.clipboard.writeText(valor).then(() => {
+            respo.innerHTML = `O valor de "${ref}" - <strong>${valor}</strong> foi copiado para a área de transferência.`;
+        }).catch(() => {
+            respo.innerHTML = 'Falha ao copiar o valor.';
+        });
+    }
+
+    function carregarDados() {
+        const numCamposSalvos = parseInt(localStorage.getItem('numCampos')) || 1;
+        numCamposInput.value = numCamposSalvos;
+
+        for (let i = 1; i <= numCamposSalvos; i++) {
+            const dadosSalvos = JSON.parse(localStorage.getItem(`campo${i}`)) || { ref: '', valor: '' };
+            criarCampo(i, dadosSalvos.ref, dadosSalvos.valor);
+        }
+    }
+    function changeLanguage() {
+        const lang = languageSelect.value;
+        if (lang === 'en') {
+            document.getElementById('title').innerText = 'Easy Copy';
+            document.getElementById('labelNumCampos').innerText = 'Choose the number of fields:';
+            document.getElementById('updateBtn').innerText = 'Update Fields';
+            document.getElementById('updateBtn').title = 'Click here to update the number of fields and table values';
+            document.getElementById('clearBtn').innerText = 'Clear Fields';
+            document.getElementById('clearBtn').title = 'Click here to clear all fields and tables';
+            document.getElementById('denv').innerText = 'Developed by MHPS';
+            document.getElementById('denv').title = 'Access MHPS website';
+
+            document.querySelectorAll('.refLabel').forEach(label => label.innerText = 'Ref:');
+            document.querySelectorAll('.valueLabel').forEach(label => label.innerText = 'Value:');
+            document.querySelectorAll('.copyBtn').forEach(btn => btn.innerText = 'Copy Value');
+        } else if (lang === 'pt') {
+            document.getElementById('title').innerText = 'Copia Fácil';
+            document.getElementById('labelNumCampos').innerText = 'Escolha a quantidade de campos:';
+            document.getElementById('updateBtn').innerText = 'Atualizar Campos';
+            document.getElementById('updateBtn').title = 'Clique aqui para atualizar a quantidade de campos e os valores das tabelas';
+            document.getElementById('clearBtn').innerText = 'Zerar Campos';
+            document.getElementById('clearBtn').title = 'Clique aqui para limpar todos os campos e tabelas';
+            document.getElementById('denv').innerText = 'Desenvolvido por MHPS';
+            document.getElementById('denv').title = 'Acessar site MHPS';
+
+            document.querySelectorAll('.refLabel').forEach(label => label.innerText = 'Ref:');
+            document.querySelectorAll('.valueLabel').forEach(label => label.innerText = 'Valor:');
+            document.querySelectorAll('.copyBtn').forEach(btn => btn.innerText = 'Copiar Valor');
+        }
+    }
+
+    window.onload = function() {
+        carregarDados();
+        changeLanguage(); 
+    }
+</script>
+
+</body>
+</html>
