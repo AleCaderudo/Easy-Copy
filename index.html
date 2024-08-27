@@ -77,6 +77,7 @@
         const campoDiv = document.createElement('div');
         campoDiv.classList.add('campo-container');
         campoDiv.id = `campo${id}`;
+        const numid = id;
 
         const lang = languageSelect.value;
         let copyBtnTitle = '';
@@ -87,7 +88,7 @@
         }
 
         campoDiv.innerHTML = `
-            <label for="ref${id}" class="refLabel"> ${id} - Ref:</label>
+            <label for="ref${id}" class="refLabel">${numid} - Ref:</label>
             <input type="text" id="ref${id}" placeholder="Ref" value="${refValue}" size="10">
             
             <label for="valor${id}" class="valueLabel">Valor:</label>
@@ -153,7 +154,7 @@
             criarCampo(i, dadosSalvos.ref, dadosSalvos.valor);
         }
     }
-    
+
     function changeLanguage() {
     const lang = languageSelect.value;
 
@@ -167,7 +168,6 @@
         document.getElementById('denv').innerText = 'Developed by MHPS';
         document.getElementById('denv').title = 'Access MHPS website';
 
-        document.querySelectorAll('.refLabel').forEach(label => label.innerText = 'Ref:');
         document.querySelectorAll('.valueLabel').forEach(label => label.innerText = 'Value:');
         document.querySelectorAll('.copyBtn').forEach(btn => {
             btn.innerText = 'Copy Value';
@@ -185,7 +185,6 @@
         document.getElementById('denv').innerText = 'Desenvolvido por MHPS';
         document.getElementById('denv').title = 'Acessar site MHPS';
 
-        document.querySelectorAll('.refLabel').forEach(label => label.innerText = 'Ref:');
         document.querySelectorAll('.valueLabel').forEach(label => label.innerText = 'Valor:');
         document.querySelectorAll('.copyBtn').forEach(btn => {
             btn.innerText = 'Copiar Valor';
